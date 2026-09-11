@@ -15,12 +15,21 @@ export type Question = {
 
 export type QuestionSet = {
   id: string;
+  ownerId: string;
   title: string;
   description?: string;
   announcement?: string;
   questions: Question[];
   createdAt: number;
   updatedAt: number;
+};
+
+export type HostAccount = {
+  username: string; // display casing, e.g. "Romit"
+  ownerId: string; // normalized lowercase, used as the stable key/owner id
+  passwordHash: string;
+  salt: string;
+  createdAt: number;
 };
 
 export type RoomStatus = "lobby" | "question" | "results" | "ended";

@@ -3,6 +3,7 @@ import { customAlphabet, nanoid } from "nanoid";
 import { computePoints } from "./scoring";
 import type {
   AnswerRecord,
+  HostAccount,
   Player,
   QuestionSet,
   RoomMeta,
@@ -24,10 +25,14 @@ function roomKey(code: string, suffix: string) {
   return `room:${code}:${suffix}`;
 }
 
-// ---- Question sets (persistent) ----
+// ---- Question sets (persistent, scoped per owner) ----
 
-export async function listQuestionSets(): Promise<QuestionSet[]> {
-  const ids = await redis.smembers("qset:ids");
+function ownerQsetIndexKey(ownerId: string) {
+  return `qset:ids:${ownerId}`;
+}
+
+export async function listQuestionSets(ownerId: string): Promise<QuestionSet[]> {
+  const ids = await redis.smembers(ownerQsetIndexKey(ownerId));
   if (ids.length === 0) return [];
   const sets = await Promise.all(ids.map((id) => getQuestionSet(id)));
   return sets.filter((s): s is QuestionSet => s !== null).sort((a, b) => a.createdAt - b.createdAt);
@@ -41,12 +46,28 @@ export async function getQuestionSet(id: string): Promise<QuestionSet | null> {
 
 export async function saveQuestionSet(qset: QuestionSet): Promise<void> {
   await redis.set(`qset:${qset.id}`, JSON.stringify(qset));
-  await redis.sadd("qset:ids", qset.id);
+  await redis.sadd(ownerQsetIndexKey(qset.ownerId), qset.id);
 }
 
-export async function deleteQuestionSet(id: string): Promise<void> {
+export async function deleteQuestionSet(id: string, ownerId: string): Promise<void> {
   await redis.del(`qset:${id}`);
-  await redis.srem("qset:ids", id);
+  await redis.srem(ownerQsetIndexKey(ownerId), id);
+}
+
+// ---- Host accounts ----
+
+function hostAccountKey(ownerId: string) {
+  return `host:${ownerId}`;
+}
+
+export async function getHostAccount(ownerId: string): Promise<HostAccount | null> {
+  const raw = await redis.get<HostAccount | string>(hostAccountKey(ownerId));
+  if (!raw) return null;
+  return typeof raw === "string" ? (JSON.parse(raw) as HostAccount) : raw;
+}
+
+export async function createHostAccount(account: HostAccount): Promise<void> {
+  await redis.set(hostAccountKey(account.ownerId), JSON.stringify(account));
 }
 
 // ---- Rooms (ephemeral) ----

@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHostSessionToken, HOST_SESSION_COOKIE, timingSafeEqual } from "@/lib/auth";
+import { createHostSessionToken, HOST_SESSION_COOKIE, verifyPassword } from "@/lib/auth";
+import { getHostAccount } from "@/lib/redis";
 
 export async function POST(req: NextRequest) {
-  const { passcode } = await req.json().catch(() => ({ passcode: "" }));
-  const expected = process.env.HOST_PASSCODE ?? "";
-
-  if (!expected || typeof passcode !== "string" || !timingSafeEqual(passcode, expected)) {
-    return NextResponse.json({ error: "Incorrect passcode" }, { status: 401 });
+  const { username, password } = await req.json().catch(() => ({}));
+  if (typeof username !== "string" || typeof password !== "string") {
+    return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
   }
 
-  const token = await createHostSessionToken();
+  const ownerId = username.trim().toLowerCase();
+  const account = await getHostAccount(ownerId);
+  if (!account || !verifyPassword(password, account.passwordHash, account.salt)) {
+    return NextResponse.json({ error: "Incorrect username or password" }, { status: 401 });
+  }
+
+  const token = await createHostSessionToken(ownerId);
   const res = NextResponse.json({ ok: true });
   res.cookies.set(HOST_SESSION_COOKIE, token, {
     httpOnly: true,

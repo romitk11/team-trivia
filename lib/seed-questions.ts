@@ -18,7 +18,6 @@ function q(
   };
 }
 
-export const LAUNCH_SET_ID = "team-trivia-launch";
 
 const questions: Question[] = [
   q("q1", "What was the main purpose of a Discman?", [
@@ -203,10 +202,11 @@ const questions: Question[] = [
   ], 1, 30),
 ];
 
-export function buildLaunchSet(): QuestionSet {
+export function buildLaunchSet(id: string, ownerId: string): QuestionSet {
   const now = Date.now();
   return {
-    id: LAUNCH_SET_ID,
+    id,
+    ownerId,
     title: "Team Trivia — Launch Set",
     description: "Nostalgia, pop culture, and generational trivia — 30 questions.",
     announcement: "🏆 Top three win a prize!",

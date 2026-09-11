@@ -8,6 +8,7 @@ import type { QuestionSet } from "@/lib/types";
 export default function HostDashboardPage() {
   const router = useRouter();
   const [sets, setSets] = useState<QuestionSet[] | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creatingFrom, setCreatingFrom] = useState<string | null>(null);
 
@@ -16,7 +17,16 @@ export default function HostDashboardPage() {
       .then((res) => res.json())
       .then((body) => setSets(body.questionSets))
       .catch(() => setError("Couldn't load question sets."));
+    fetch("/api/host/me")
+      .then((res) => res.json())
+      .then((body) => setUsername(body.username))
+      .catch(() => {});
   }, []);
+
+  async function handleLogout() {
+    await fetch("/api/host/logout", { method: "POST" });
+    router.push("/host/login");
+  }
 
   async function hostSet(qsetId: string) {
     setCreatingFrom(qsetId);
@@ -39,7 +49,7 @@ export default function HostDashboardPage() {
   return (
     <div className="stage flex-1 px-6 py-12">
       <div className="mx-auto w-full max-w-2xl">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between">
           <h1 className="font-display text-3xl font-bold text-white">Host Dashboard</h1>
           <Link
             href="/host/sets/new/edit"
@@ -47,6 +57,12 @@ export default function HostDashboardPage() {
           >
             + New Set
           </Link>
+        </div>
+        <div className="mb-8 flex items-center justify-between text-sm text-surface">
+          <span>{username ? `Logged in as ${username}` : ""}</span>
+          <button onClick={handleLogout} className="font-semibold text-surface underline-offset-2 hover:underline">
+            Log out
+          </button>
         </div>
 
         {error && <p className="mb-4 font-semibold text-answer-red">{error}</p>}
