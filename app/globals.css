@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #292e33;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
+
+  /* J.P. Morgan Salt Design System palette (jpmorganchase/salt-ds) */
+  --color-brand-blue: #0078cf;
+  --color-brand-blue-hover: #005ea6;
+  --color-brand-blue-dark: #002d59;
+  --color-brand-blue-light: #eaf6ff;
+
+  --color-ink: #292e33;
+  --color-surface: #e6e9eb;
+  --color-snow: #ffffff;
+  --color-marble: #f5f7f8;
+  --color-jet: #101820;
+  --color-granite: #1a2229;
+
+  --color-answer-red: #e52135;
+  --color-answer-orange: #c75300;
+  --color-answer-green: #00875d;
+  --color-answer-blue: #0078cf;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #101820;
+    --foreground: #e6e9eb;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ---- Shared visual language: gradient stage + glow blobs ---- */
+
+.stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(60rem 60rem at 15% -10%, rgba(0, 120, 207, 0.35), transparent 60%),
+    radial-gradient(50rem 50rem at 110% 10%, rgba(0, 135, 93, 0.22), transparent 55%),
+    radial-gradient(40rem 40rem at 50% 120%, rgba(229, 33, 53, 0.16), transparent 55%),
+    var(--color-jet);
+}
+
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.5;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 0%, transparent 75%);
+}
+
+.card-glow {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 20px 60px -20px rgba(0, 120, 207, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+}
+
+/* ---- Keyframes ---- */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(0, -18px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(540deg);
+    opacity: 0.9;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.text-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.6) 20%,
+    rgba(255, 255, 255, 1) 40%,
+    rgba(255, 255, 255, 1) 60%,
+    rgba(255, 255, 255, 0.6) 80%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 3.5s linear infinite;
+}
